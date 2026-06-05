@@ -1,0 +1,51 @@
+{%- comment -%}
+  Renders a Spotify Embed Track Player for a product.
+  Usage:
+  {% render 'spotify-track-player', product: product, size: 'compact' %}
+  
+  Accepts:
+  - product: {Object} Product object (required)
+  - size: {String} 'compact' (80px height) or 'large' (352px height). Default: 'compact'
+  - theme_color: {String} '0' or '1' (Spotify embed color themes)
+{%- endcomment -%}
+
+{%- assign raw_identifier = product.metafields.spotify.track_identifier.value | default: product.metafields.spotify.track_identifier -%}
+
+{%- if raw_identifier != blank -%}
+  {%- assign cleaned_identifier = raw_identifier | strip -%}
+  {%- assign track_id = cleaned_identifier -%}
+
+  {%- if cleaned_identifier contains 'spotify:track:' -%}
+    {%- assign track_id = cleaned_identifier | replace: 'spotify:track:', '' -%}
+  {%- elsif cleaned_identifier contains 'spotify.com/track/' -%}
+    {%- assign track_id = cleaned_identifier | split: 'spotify.com/track/' | last | split: '?' | first | split: '/' | first -%}
+  {%- elsif cleaned_identifier contains 'open.spotify.com/embed/track/' -%}
+    {%- assign track_id = cleaned_identifier | split: 'open.spotify.com/embed/track/' | last | split: '?' | first | split: '/' | first -%}
+  {%- endif -%}
+
+  {%- assign embed_height = 80 -%}
+  {%- if size == 'large' -%}
+    {%- assign embed_height = 352 -%}
+  {%- endif -%}
+
+  <div class="spotify-track-player-wrapper" style="margin: 1.5rem 0; width: 100%; max-width: 100%; overflow: hidden; border-radius: 12px; line-height: 0;">
+    <iframe 
+      src="https://open.spotify.com/embed/track/{{ track_id | escape }}?utm_source=generator{% if theme_color == '0' or theme_color == '1' %}&theme={{ theme_color }}{% endif %}" 
+      width="100%" 
+      height="{{ embed_height }}" 
+      frameBorder="0" 
+      allowfullscreen="" 
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+      loading="lazy"
+      style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s ease, box-shadow 0.3s ease;"
+      class="spotify-track-iframe"
+    ></iframe>
+  </div>
+
+  <style>
+    .spotify-track-player-wrapper:hover iframe {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+  </style>
+{%- endif -%}
