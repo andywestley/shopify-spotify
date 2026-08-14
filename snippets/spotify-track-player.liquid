@@ -9,7 +9,8 @@
   - theme_color: {String} '0' or '1' (Spotify embed color themes)
 {%- endcomment -%}
 
-{%- assign raw_identifier = product.metafields.spotify.track_identifier.value | default: product.metafields.spotify.track_identifier -%}
+{%- assign raw_identifier = product.metafields.custom.spotify_track_id.value | default: product.metafields.custom.spotify_track_id -%}
+
 
 {%- if raw_identifier != blank -%}
   {%- assign cleaned_identifier = raw_identifier | strip -%}
