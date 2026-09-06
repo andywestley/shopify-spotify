@@ -21,11 +21,32 @@
     {%- assign playlist_id = cleaned_identifier | split: 'open.spotify.com/embed/playlist/' | last | split: '?' | first | split: '/' | first -%}
   {%- endif -%}
 
-  <div class="shopify-section-spotify-playlist color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding" id="shopify-section-spotify-playlist-{{ section.id }}">
+  {%- capture iframe_title -%}
+    {%- if section.settings.heading != blank -%}
+      Spotify playlist player: {{ section.settings.heading | escape }}
+    {%- elsif collection.title != blank -%}
+      Spotify playlist player for {{ collection.title | escape }}
+    {%- else -%}
+      Spotify playlist player
+    {%- endif -%}
+  {%- endcapture -%}
+
+  <div 
+    class="shopify-section-spotify-playlist color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding" 
+    id="shopify-section-spotify-playlist-{{ section.id }}"
+    {% if section.settings.heading != blank %}
+      aria-labelledby="SpotifyHeading-{{ section.id }}"
+    {% else %}
+      aria-label="Spotify Playlist"
+    {% endif %}
+    role="region"
+  >
     <div class="page-width">
       <div class="spotify-playlist-container {% if section.settings.center_align %}spotify-playlist-center{% endif %}">
         {%- if section.settings.heading != blank -%}
-          <h2 class="title inline-richtext {{ section.settings.heading_size }}">{{ section.settings.heading | escape }}</h2>
+          <h2 id="SpotifyHeading-{{ section.id }}" class="title inline-richtext {{ section.settings.heading_size }}">
+            {{ section.settings.heading | escape }}
+          </h2>
         {%- endif -%}
         
         {%- if section.settings.description != blank -%}
@@ -35,14 +56,18 @@
         <div class="spotify-playlist-embed-wrapper">
           <iframe 
             src="https://open.spotify.com/embed/playlist/{{ playlist_id | escape }}?utm_source=generator{% if section.settings.theme_color == '0' or section.settings.theme_color == '1' %}&theme={{ section.settings.theme_color }}{% endif %}" 
+            title="{{ iframe_title | strip }}"
             width="100%" 
             height="{{ section.settings.embed_height }}" 
-            frameBorder="0" 
             allowfullscreen="" 
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
             loading="lazy"
             class="spotify-playlist-iframe"
-          ></iframe>
+          >
+            <a href="https://open.spotify.com/playlist/{{ playlist_id | escape }}" target="_blank" rel="noopener noreferrer">
+              Listen to {{ section.settings.heading | default: collection.title | default: 'this playlist' | escape }} on Spotify
+            </a>
+          </iframe>
         </div>
       </div>
     </div>
@@ -92,7 +117,15 @@
 
     .spotify-playlist-iframe {
       border-radius: 12px;
-      border: none;
+      border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spotify-playlist-embed-wrapper,
+      .spotify-playlist-embed-wrapper:hover {
+        transition: none !important;
+        transform: none !important;
+      }
     }
   </style>
 {%- endif -%}

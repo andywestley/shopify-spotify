@@ -9,8 +9,10 @@
   - theme_color: {String} '0' or '1' (Spotify embed color themes)
 {%- endcomment -%}
 
-{%- assign raw_identifier = product.metafields.custom.spotify_track_id.value | default: product.metafields.custom.spotify_track_id -%}
-
+{%- assign raw_identifier = product.metafields.spotify.track_identifier.value 
+  | default: product.metafields.spotify.track_identifier 
+  | default: product.metafields.custom.spotify_track_id.value 
+  | default: product.metafields.custom.spotify_track_id -%}
 
 {%- if raw_identifier != blank -%}
   {%- assign cleaned_identifier = raw_identifier | strip -%}
@@ -29,24 +31,44 @@
     {%- assign embed_height = 352 -%}
   {%- endif -%}
 
+  {%- capture iframe_title -%}
+    {%- if product.title != blank -%}
+      Spotify track player for {{ product.title | escape }}
+    {%- else -%}
+      Spotify track player
+    {%- endif -%}
+  {%- endcapture -%}
+
   <div class="spotify-track-player-wrapper" style="margin: 1.5rem 0; width: 100%; max-width: 100%; overflow: hidden; border-radius: 12px; line-height: 0;">
     <iframe 
       src="https://open.spotify.com/embed/track/{{ track_id | escape }}?utm_source=generator{% if theme_color == '0' or theme_color == '1' %}&theme={{ theme_color }}{% endif %}" 
+      title="{{ iframe_title | strip }}"
       width="100%" 
       height="{{ embed_height }}" 
-      frameBorder="0" 
       allowfullscreen="" 
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
       loading="lazy"
-      style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s ease, box-shadow 0.3s ease;"
+      style="border: 0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s ease, box-shadow 0.3s ease;"
       class="spotify-track-iframe"
-    ></iframe>
+    >
+      <a href="https://open.spotify.com/track/{{ track_id | escape }}" target="_blank" rel="noopener noreferrer">
+        Listen to {{ product.title | default: 'this track' | escape }} on Spotify
+      </a>
+    </iframe>
   </div>
 
   <style>
     .spotify-track-player-wrapper:hover iframe {
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spotify-track-iframe,
+      .spotify-track-player-wrapper:hover iframe {
+        transition: none !important;
+        transform: none !important;
+      }
     }
   </style>
 {%- endif -%}
